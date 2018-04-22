@@ -37,15 +37,13 @@ section {
 @media screen and (min-device-width: 800px) {
 	html { font-size: 24px; }
 	.game { height: 80%; }
+	#gameBackGround { border-radius: 0.5rem; }
 }
 .game {
 	min-width: 10rem;
 	min-height: 10rem;
 }
-#gameBackGround {
-	border-radius: 0.5rem;
-	background-color: rgb(195, 171, 152);
-}
+#gameBackGround { background-color: rgb(195, 171, 152); }
 button {
 	display: none;
 	background-color: #eee;
@@ -58,6 +56,4 @@ button {
 	min-width: 8rem;
 	min-height: 2rem;
 }
-button:hover {
-	background-color: #ddd;
-}
+button:hover { background-color: #ddd; }

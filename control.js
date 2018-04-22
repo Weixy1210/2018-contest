@@ -10,7 +10,7 @@ var block = {
 				{val: 8, color1: "rgb(255,173,109)", color2: "rgb(250,246,241)"},
 				{val: 16, color1: "rgb(255,149,92)", color2: "rgb(250,246,241)"},    // 自配填充色
 				{val: 32, color1: "rgb(255,113,80)", color2: "rgb(250,246,241)"},
-				{val: 64, color1: "rgb(254,82,39)", color2: "rgb(250,246,241)"},
+				{val: 64, color1: "rgb(254,80,68)", color2: "rgb(250,246,241)"},
 				{val: 128, color1: "rgb(246,207,106)", color2: "rgb(250,246,241)"},
 				{val: 256, color1: "rgb(247,205,90)", color2: "rgb(250,246,241)"},   // 自配填充色
 				{val: 512, color1: "rgb(248,203,74)", color2: "rgb(250,246,241)"},   // 自配填充色
@@ -87,22 +87,22 @@ var block = {
 		context.fillStyle = text.color
 		// 调整字体大小
 		if (text.val < 100) {
-			context.font="bolder 800px Arial"
+			context.font="bolder 750px Arial"
 		} else if (text.val < 1000) {
 			context.font="bolder 600px Arial"
 		} else {
 			context.font="bolder 400px Arial"
 		}
-		// 使文字水平轴线为中央
-		context.textAlign="center";
+		// 使文字轴线为中央
+		context.textAlign="center"
+		context.textBaseline="middle"
 		// 绘制  
-		context.fillText(text.val, target.x+600, target.y+850)  // 文字居中的实现生硬
+		context.fillText(text.val, target.x+600, target.y+600)
 	},
 	// 生成新的棋子
 	randomPiece: function (context) {
 		if (this.blankRest <= 0) {  // 没有空余位置，输了
-			this.gameResult = 2
-			document.getElementById("lose").style.display = "inline"
+			this.showResult(2)
 		} else {
 			do {  // 随机找到一个空余位置
 				var i = Math.round(Math.random()*3), j = Math.round(Math.random()*3)
@@ -116,7 +116,7 @@ var block = {
 			this.blankRest--
 			// 开启按键监听
 			this.eventListenerLock = true
-			// 判断有没有输
+			// 如果已经没有空位，判断有没有输
 			if (this.blankRest === 0) { this.judgeLose() }
 		}
 	},
@@ -133,7 +133,7 @@ var block = {
 		this.numberMatrix = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
 		this.eventListenerLock = true
 		this.blankRest = 16
-		this.gameResult = 0
+		this.showResult(0)
 		// 清空画布
 		context.clearRect(0, 0, 5800, 5800)
 		// 随机放置两个棋子
@@ -336,7 +336,7 @@ var block = {
 							block.movements = []  // 清空移动信息
 							// 判断输赢
 							if (block.gameResult === 1) {
-								document.getElementById("win").style.display = "inline"
+								block.showResult(1)
 							} else {
 								setTimeout(function () {
 									block.randomPiece(context)  // 新增一个棋子
@@ -352,7 +352,7 @@ var block = {
 					}
 				})
 			})
-		}
+		} else { this.eventListenerLock = true }
 	},
 	// 向下移动棋子
 	moveDown: function (context) {
@@ -404,7 +404,7 @@ var block = {
 							block.movements = []  // 清空移动信息
 							// 判断输赢
 							if (block.gameResult === 1) {
-								document.getElementById("win").style.display = "inline"
+								block.showResult(1)
 							} else {
 								setTimeout(function () {
 									block.randomPiece(context)  // 新增一个棋子
@@ -420,7 +420,7 @@ var block = {
 					}
 				})
 			})
-		}
+		} else { this.eventListenerLock = true }
 	},
 	// 向左移动棋子
 	moveLeft: function (context) {
@@ -472,7 +472,7 @@ var block = {
 							block.movements = []  // 清空移动信息
 							// 判断输赢
 							if (block.gameResult === 1) {
-								document.getElementById("win").style.display = "inline"
+								block.showResult(1)
 							} else {
 								setTimeout(function () {
 									block.randomPiece(context)  // 新增一个棋子
@@ -488,7 +488,7 @@ var block = {
 					}
 				})
 			})
-		}
+		} else { this.eventListenerLock = true }
 	},
 	// 向右移动棋子
 	moveRight: function (context) {
@@ -540,7 +540,7 @@ var block = {
 							block.movements = []  // 清空移动信息
 							// 判断输赢
 							if (block.gameResult === 1) {
-								document.getElementById("win").style.display = "inline"
+								block.showResult(1)
 							} else {
 								setTimeout(function () {
 									block.randomPiece(context)  // 新增一个棋子
@@ -556,16 +556,31 @@ var block = {
 					}
 				})
 			})
-		}
+		} else { this.eventListenerLock = true }
 	},
-	// 判断是否输了
-	judgeLose: function () {
-		// 没有移动的可能了
+	// 判断游戏是否输了
+	judgeLose: function (result) {
+		// 判断是否没有移动的可能了
 		if (this.upFind(false) === 0 && this.downFind(false) === 0 && this.leftFind(false) === 0 && this.rightFind(false) === 0) {
-			this.gameResult = 2
-			document.getElementById("lose").style.display = "inline"
-			// 关闭按键监听
-			this.eventListenerLock = false
+			this.showResult(2)
+		}		
+	},
+	// 显示游戏结果
+	showResult: function (result) {
+		switch (result) {
+			case 0:  // 游戏中
+				this.gameResult = 0
+				break
+			case 1:  // 赢了
+				this.gameResult = 1
+				document.getElementById("win").style.display = "inline"
+				this.eventListenerLock = false
+				break
+			case 2:  // 输了
+				this.gameResult = 2
+				document.getElementById("lose").style.display = "inline"
+				this.eventListenerLock = false
+				break
 		}
 	}
 }
@@ -575,6 +590,7 @@ window.onload = function () {
 	let btn = document.getElementsByTagName("button")
 	for (let i in btn) {
 		btn[i].onclick = function() {
+			console.log("click")
 			this.style.display = "none"
 			// 开始游戏，获取并绘制背景
 			let backGroundContainer = document.getElementById("gameBackGround")
@@ -608,28 +624,46 @@ window.onload = function () {
 			let wrap = document.getElementById("wrap")
 			let startX, startY, endX, endY
 			wrap.addEventListener("touchstart", function f(e){
-				e.preventDefault()
-				startX = e.changedTouches[0].pageX
-				startY = e.changedTouches[0].pageY
+				// 游戏中状态才监听滑动，否则触发按钮点击
+				if (block.gameResult === 0) {
+					e.preventDefault()  // 阻止事件冒泡
+					startX = e.changedTouches[0].pageX
+					startY = e.changedTouches[0].pageY
+				}
 			});
 			wrap.addEventListener("touchend", function f(e){
-				e.preventDefault()
-				if (block.eventListenerLock) {
-					block.eventListenerLock = false
-					endX = e.changedTouches[0].pageX
-				    endY = e.changedTouches[0].pageY
-				    let x = Math.abs(endX - startX) < 50 ? 0 : endX - startX
-				    let y = Math.abs(endY - startY) < 50 ? 0 : endY - startY
-				    // 右滑
-				    if ( x > 0 && Math.abs(x) > Math.abs(y)) { block.moveRight(moveContext) }
-				    // 左滑
-				    if ( x < 0 && Math.abs(x) > Math.abs(y)) { block.moveLeft(moveContext) }
-				    // 上滑
-				    if ( y < 0 && Math.abs(x) < Math.abs(y)) { block.moveUp(moveContext) }
-				    // 下滑
-				    if ( y > 0 && Math.abs(x) < Math.abs(y)) { block.moveDown(moveContext) }
-				}     
+				// 游戏中状态才监听滑动，否则触发按钮点击
+				if (block.gameResult === 0) {
+					e.preventDefault()  // 阻止事件冒泡
+					if (block.eventListenerLock) {
+						endX = e.changedTouches[0].pageX
+					    endY = e.changedTouches[0].pageY
+					    // 排除小范围的手指点击误差
+					    let x = Math.abs(endX - startX) < 50 ? 0 : endX - startX
+					    let y = Math.abs(endY - startY) < 50 ? 0 : endY - startY
+					    // 右滑
+					    if ( x > 0 && Math.abs(x) > Math.abs(y)) { 
+					    	block.eventListenerLock = false
+					    	block.moveRight(moveContext)
+					    }
+					    // 左滑
+					    if ( x < 0 && Math.abs(x) > Math.abs(y)) {
+					    	block.eventListenerLock = false
+					    	block.moveLeft(moveContext)
+					    }
+					    // 上滑
+					    if ( y < 0 && Math.abs(x) < Math.abs(y)) {
+					    	block.eventListenerLock = false
+					    	block.moveUp(moveContext)
+					    }
+					    // 下滑
+					    if ( y > 0 && Math.abs(x) < Math.abs(y)) {
+					    	block.eventListenerLock = false
+					    	block.moveDown(moveContext)
+					    }
+					}
+				}
 			})
-		}
+		}			
 	}
 }
